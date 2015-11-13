@@ -167,6 +167,7 @@ public class PosTagger extends JFrame implements ActionListener{
 
 
 		            originalText.setCaretPosition(0);
+		            originalText.setEditable(false);
 		            taggedText.setEditable(true);
 		            taggedText.setText("");
 		            
@@ -176,9 +177,9 @@ public class PosTagger extends JFrame implements ActionListener{
 			    	
 			    	output = parser.getPVL().toString();
 			    	appendToPane(taggedText, "PVL \n", Color.GREEN);
-			    	appendToPane(taggedText, output, Color.WHITE);	    	
-			    	
+			    	appendToPane(taggedText, output, Color.WHITE);				    	
 			        taggedText.setCaretPosition(0);
+			        taggedText.setEditable(false);
 		        }
 		        catch (Exception e2){
 		        	e2.printStackTrace();
