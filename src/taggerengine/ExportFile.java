@@ -6,11 +6,11 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 public class ExportFile {
 	private String fileName;
+	private String result;
     private static final String COMMA_DELIMITER = ",";
     private static final String NEW_LINE_SEPARATOR = "\n";
     private static final String FILE_HEADER = "id,word,pos,count";
-    PosList result;
-	public ExportFile(String fileName,PosList result){
+	public ExportFile(String fileName, String result){
 		this.fileName = fileName;
 		this.result = result;
 	}
@@ -27,10 +27,9 @@ public class ExportFile {
 		FileWriter fileWriter = null;
 		try{
 			fileWriter = new FileWriter(fileName);
-			fileWriter.append(FILE_HEADER.toString());
-			fileWriter.append(NEW_LINE_SEPARATOR);
-			
-			for(Pos p:result.getList()){
+/*			fileWriter.append(FILE_HEADER.toString());
+			fileWriter.append(NEW_LINE_SEPARATOR);			
+			for(Pos p:avl.getList()){
 				fileWriter.append(String.valueOf(p.getId()));
 				fileWriter.append(COMMA_DELIMITER);
 				fileWriter.append(p.getWord());
@@ -40,6 +39,10 @@ public class ExportFile {
 				fileWriter.append(String.valueOf(p.getCount()));
 				fileWriter.append(NEW_LINE_SEPARATOR);
 			}
+			
+			*/
+			fileWriter.append(result);
+			
 		}
 		catch (Exception e){
 			e.printStackTrace();

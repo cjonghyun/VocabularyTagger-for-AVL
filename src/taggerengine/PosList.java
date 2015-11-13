@@ -8,7 +8,15 @@ import java.io.PrintWriter;
 import java.io.IOException;
 
 public class PosList {
-	private List<Pos> pos = new ArrayList<Pos>();
+	String name;
+	private List<Pos> pos;
+	public PosList(String name){
+		this.name = name;
+		pos =  new ArrayList<Pos>();
+	}
+	public String getName(){
+		return name;
+	}
 	public void add(Pos p){
 		pos.add(p);
 	}
@@ -43,25 +51,19 @@ public class PosList {
 	@Override
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("ID \t WORD \t POS \t COUNT\n");
-
+		sb.append("ID \t WORD \t\t POS \t COUNT\n");
 		for(Pos p : pos){
-			sb.append(p.getId() + "\t" + p.getWord() + "\t" + p.getTag() + "\t" + p.getCount() + "\n");
+			sb.append(name + String.format("%04d", p.getId()) + "\t" + String.format("%-20s", p.getWord()) + "\t"+ p.getTag() + "\t" + p.getCount() + "\n");
 		}
 		return sb.toString();
 	}
-	public void out(){
-		try{
-			PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
-			writer.print("ID \t WORD \t POS \t COUNT\n");
-//			pos.stream().sorted((e1, e2) -> Integer.compare(e2.getCount(),e1.getCount())).forEach(e ->  writer.println(e.getId() + "\t" + e.getWord() + "\t" + e.getTag() + "\t" + e.getCount() ) );
+	public String csvForm(){
+		String result;
+			result = name + "\n";
+			result += "ID,WORD,POS,COUNT\n";
 			for(Pos p : pos){
-				writer.print(p.getId() + "\t" + p.getWord() + "\t" + p.getTag() + "\t" + p.getCount() + "\n");
+				result += (name + String.format("%04d", p.getId()) + "," + p.getWord() + "," + p.getTag() + "," + p.getCount() + "\n");
 			}
-			writer.close();
-		}
-		catch (IOException ex){
-			ex.printStackTrace();
-		}
+		return result;		
 	}
 }

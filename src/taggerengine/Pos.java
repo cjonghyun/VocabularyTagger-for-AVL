@@ -19,37 +19,43 @@ public class Pos implements Comparable{
 		word = w;
 		tag = t;
 		count = 0;
-		pastTense = null;
+		pastTense = exceptions(w);
+
+	}
+	private String exceptions(String w){
+		String temp= null;
+
 		if(tag.equals("v")){
 //			pastTense = getPastTense();			
 			if(w.equals("seek")){
-				pastTense = "sought";
+				temp = "sought";
 			}
 			else if(w.equals("foregoes")){
-				pastTense = "forewent";
+				temp = "forewent";
 			}
 			else if(w.equals("undertake")){
-				pastTense = "undertook";
+				temp = "undertook";
 			}
 			else if(w.equals("grind")){
-				pastTense = "ground";
+				temp = "ground";
 			}
 			else if(w.equals("arise")){
-				pastTense = "arose";
+				temp = "arose";
 			}
 			else if(w.equals("employ")){
-				pastTense = "employed";
+				temp = "employed";
 			}
 			else if(w.endsWith("y")){
-				pastTense = w.substring(0, w.length()-1) + "ied";
+				temp = w.substring(0, w.length()-1) + "ied";
 			}
 			else if(w.endsWith("e")){
-				pastTense = w + "d";
+				temp = w + "d";
 			}
 			else{
-				pastTense = w + "ed";
+				temp = w + "ed";
 			}
 		}
+		return temp;
 	}
 	public void setPast(String s){
 		pastTense = s;
@@ -110,6 +116,8 @@ public class Pos implements Comparable{
 				}
 			}
 			if(tag.equals("v")){
+				if(pastTense == null)
+					System.out.println(w + " - " + t);
 				if(pastTense.equals(w))
 					return true;
 			}

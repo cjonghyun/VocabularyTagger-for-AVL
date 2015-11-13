@@ -13,7 +13,9 @@ import taggerengine.Highlight;
 
 import java.util.List;
 
+import javax.swing.text.AttributeSet;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -31,14 +33,14 @@ public class PosTagger extends JFrame implements ActionListener{
 	private JTextPane originalText;
 	private JButton parseButton;
 	private JPanel taggedTextPane;
-	private JTextArea taggedText;
+	private JTextPane taggedText;
 	private JScrollPane originalScroll;
 	private JScrollPane taggedScroll;
 	private JButton exportButton;
 	private boolean fileLoaded = false;
 	private File inputFile;
 	public PosTagger(){
-		this.setSize(900,900);
+		this.setSize(1200,900);
 		splitPane = new JSplitPane();
 		fc = new JFileChooser();
 		loadLabel = new JLabel("Load File"); 
@@ -48,12 +50,12 @@ public class PosTagger extends JFrame implements ActionListener{
 		originalTextPane = new JPanel();
 		filePanel = new JPanel();
 		originalText = new JTextPane();
-		originalText.setEditable(false);
+		originalText.setEditable(true);
 		originalTextPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
 		originalScroll = new JScrollPane(originalText,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		parseButton = new JButton("Analyze");
-		taggedText = new JTextArea();
+		taggedText = new JTextPane();
 		exportButton = new JButton("Export to CSV File");
 		taggedText.setEditable(false);
 		taggedScroll = new JScrollPane(taggedText,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);		
@@ -73,12 +75,24 @@ public class PosTagger extends JFrame implements ActionListener{
 		taggedTextPane.add(exportButton,BorderLayout.SOUTH);
 		splitPane.setLeftComponent(originalTextPane);
 		splitPane.setRightComponent(taggedTextPane);
-		splitPane.setDividerLocation(450);
+		splitPane.setDividerLocation(700);
 		this.add(splitPane);
 		openButton.addActionListener(this);
 		parseButton.addActionListener(this);
 		exportButton.addActionListener(this);
 	}
+    private void appendToPane(JTextPane tp, String msg, Color c)
+    {
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Background, c);
+
+        aset = sc.addAttribute(aset, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
+
+        int len = tp.getDocument().getLength();
+        tp.setCaretPosition(len);
+        tp.setCharacterAttributes(aset, false);
+        tp.replaceSelection(msg);
+    }
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -114,34 +128,56 @@ public class PosTagger extends JFrame implements ActionListener{
 	    	if(fileLoaded){
 		        parser = new Parser(inputFile.getPath());
 		        List<Highlight> highlighted = parser.getHighlighted();
-		        String output = parser.toString();
 		        try{
-			        DefaultStyledDocument document = new DefaultStyledDocument();
 		            StyleContext styleContext = new StyleContext();
 		            Style defaultStyle = styleContext.getStyle(StyleContext.DEFAULT_STYLE);
-		            Style highlightStyle = styleContext.addStyle("ConstantWidth", null);
-		            StyleConstants.setForeground(highlightStyle, Color.RED);
-		            originalText.setDocument(document);
+		            Style avlStyle = styleContext.addStyle("ConstantWidth", null);
+		            Style pvlStyle = styleContext.addStyle("ConstantWidth", null);
+		            StyleConstants.setBackground(avlStyle, Color.YELLOW);
+		            StyleConstants.setBackground(pvlStyle, Color.ORANGE);
+
 		            int len = highlighted.size();
-		            for(int i=len -1; i>=0;i--){
+		            originalText.setText("");
+		            for(int i=0;i<len;i++){
 		            	boolean type = highlighted.get(i).getFlag();
 		            	boolean eos = highlighted.get(i).isEndofSentence();
 		            	String breaker = null;
 		            	if(eos){
-		            		breaker = "\n";
+		            		breaker = "\n\n";
 		            	}
 		            	else
 		            		breaker = " ";
-		            	if(type){
-		            		document.insertString(0, highlighted.get(i).getWord() + breaker, highlightStyle);
+		            	if(type){		            		
+		            		if(highlighted.get(i).getListName().equals("AVL"))
+		            			appendToPane(originalText, highlighted.get(i).getWord() , Color.YELLOW);
+		            		else
+			                    appendToPane(originalText, highlighted.get(i).getWord() , Color.GREEN);
+
+
 		            	}
 		            	else{
-		            		document.insertString(0, highlighted.get(i).getWord() + breaker + breaker, defaultStyle);
-		            	}	
+		                    appendToPane(originalText, highlighted.get(i).getWord() , Color.WHITE);
+		            	}
+		            	if(i < len -1){
+		            		if(!(highlighted.get(i+1).getWord().equals(".") || highlighted.get(i+1).getWord().equals(",")))
+		            			appendToPane(originalText, breaker , Color.WHITE);
+		            	}
 
 		            }
+
+
 		            originalText.setCaretPosition(0);
-			    	taggedText.setText(output);
+		            taggedText.setEditable(true);
+		            taggedText.setText("");
+		            
+			        String output = parser.getAVL().toString();
+                    appendToPane(taggedText, "AVL \n", Color.YELLOW);
+			    	appendToPane(taggedText, output, Color.WHITE);
+			    	
+			    	output = parser.getPVL().toString();
+			    	appendToPane(taggedText, "PVL \n", Color.GREEN);
+			    	appendToPane(taggedText, output, Color.WHITE);	    	
+			    	
 			        taggedText.setCaretPosition(0);
 		        }
 		        catch (Exception e2){
@@ -151,7 +187,6 @@ public class PosTagger extends JFrame implements ActionListener{
 	    }
 	    if(e.getSource() == exportButton){
             JFileChooser exportFile = new JFileChooser();
-//            exportFile.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSV File","csv"));
             exportFile.showSaveDialog(this);
             
             int returnVal = exportFile.showSaveDialog(this);
