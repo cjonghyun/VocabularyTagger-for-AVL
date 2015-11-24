@@ -4,7 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -20,7 +24,7 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
-public class PosTagger extends JFrame implements ActionListener{
+public class PosTagger extends JFrame implements ActionListener, FocusListener{
 	private Parser parser;
 	private final JFileChooser fc;
 	private int returnVal ;
@@ -77,15 +81,16 @@ public class PosTagger extends JFrame implements ActionListener{
 		splitPane.setRightComponent(taggedTextPane);
 		splitPane.setDividerLocation(700);
 		this.add(splitPane);
+		originalText.addFocusListener(this);
 		openButton.addActionListener(this);
 		parseButton.addActionListener(this);
 		exportButton.addActionListener(this);
 	}
     private void appendToPane(JTextPane tp, String msg, Color c)
     {
+    	
         StyleContext sc = StyleContext.getDefaultStyleContext();
         AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Background, c);
-
         aset = sc.addAttribute(aset, StyleConstants.Alignment, StyleConstants.ALIGN_JUSTIFIED);
 
         int len = tp.getDocument().getLength();
@@ -100,7 +105,22 @@ public class PosTagger extends JFrame implements ActionListener{
 	    	returnVal = fc.showOpenDialog(openButton);
 	    	 if (returnVal == JFileChooser.APPROVE_OPTION) {
 	    		try{
-	                inputFile = fc.getSelectedFile();
+	    			inputFile = fc.getSelectedFile();
+	                filePath.setText(inputFile.getPath());
+	    			BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+	    		    String line = reader.readLine();
+	    		    String temp="";
+	    		    while(line != null) {
+	    		    	temp += line + "\n";
+	    		        line = reader.readLine();
+	    		    }
+
+	    			originalText.setText(temp);
+	                taggedText.setText("");
+	                originalText.setCaretPosition(0);
+	                fileLoaded = true;
+	                reader.close();
+/*	                inputFile = fc.getSelectedFile();
 	                filePath.setText(inputFile.getPath());
 	                Scanner sc = new Scanner(inputFile);
 	                String temp="";
@@ -111,7 +131,7 @@ public class PosTagger extends JFrame implements ActionListener{
 	                originalText.setCaretPosition(0);
 	                fileLoaded = true;
 	                taggedText.setText("");
-	                sc.close();
+	                sc.close();*/
 	    		}
 	    		catch (IOException e2){
 	    			fileLoaded = false;
@@ -126,65 +146,67 @@ public class PosTagger extends JFrame implements ActionListener{
 	    }
 	    if(e.getSource() == parseButton){ 
 	    	if(fileLoaded){
-		        parser = new Parser(inputFile.getPath());
-		        List<Highlight> highlighted = parser.getHighlighted();
-		        try{
-		            StyleContext styleContext = new StyleContext();
-		            Style defaultStyle = styleContext.getStyle(StyleContext.DEFAULT_STYLE);
-		            Style avlStyle = styleContext.addStyle("ConstantWidth", null);
-		            Style pvlStyle = styleContext.addStyle("ConstantWidth", null);
-		            StyleConstants.setBackground(avlStyle, Color.YELLOW);
-		            StyleConstants.setBackground(pvlStyle, Color.ORANGE);
-
-		            int len = highlighted.size();
-		            originalText.setText("");
-		            for(int i=0;i<len;i++){
-		            	boolean type = highlighted.get(i).getFlag();
-		            	boolean eos = highlighted.get(i).isEndofSentence();
-		            	String breaker = null;
-		            	if(eos){
-		            		breaker = "\n\n";
-		            	}
-		            	else
-		            		breaker = " ";
-		            	if(type){		            		
-		            		if(highlighted.get(i).getListName().equals("AVL"))
-		            			appendToPane(originalText, highlighted.get(i).getWord() , Color.YELLOW);
-		            		else
-			                    appendToPane(originalText, highlighted.get(i).getWord() , Color.GREEN);
-
-
-		            	}
-		            	else{
-		                    appendToPane(originalText, highlighted.get(i).getWord() , Color.WHITE);
-		            	}
-		            	if(i < len -1){
-		            		if(!(highlighted.get(i+1).getWord().equals(".") || highlighted.get(i+1).getWord().equals(",")))
-		            			appendToPane(originalText, breaker , Color.WHITE);
-		            	}
-
-		            }
-
-
-		            originalText.setCaretPosition(0);
-		            originalText.setEditable(false);
-		            taggedText.setEditable(true);
-		            taggedText.setText("");
-		            
-			        String output = parser.getAVL().toString();
-                    appendToPane(taggedText, "AVL \n", Color.YELLOW);
-			    	appendToPane(taggedText, output, Color.WHITE);
-			    	
-			    	output = parser.getPVL().toString();
-			    	appendToPane(taggedText, "PVL \n", Color.GREEN);
-			    	appendToPane(taggedText, output, Color.WHITE);				    	
-			        taggedText.setCaretPosition(0);
-			        taggedText.setEditable(false);
-		        }
-		        catch (Exception e2){
-		        	e2.printStackTrace();
-		        }
+		        parser = new Parser(inputFile.getPath(),true);
 	    	}
+	    	else{
+	    		parser = new Parser(originalText.getText(),false);
+	    	}
+	        List<Highlight> highlighted = parser.getHighlighted();
+	        try{
+	            StyleContext styleContext = new StyleContext();
+	            Style defaultStyle = styleContext.getStyle(StyleContext.DEFAULT_STYLE);
+	            Style avlStyle = styleContext.addStyle("ConstantWidth", null);
+	            Style pvlStyle = styleContext.addStyle("ConstantWidth", null);
+	            StyleConstants.setBackground(avlStyle, Color.YELLOW);
+	            StyleConstants.setBackground(pvlStyle, Color.ORANGE);
+
+	            int len = highlighted.size();
+	            originalText.setText("");
+	            for(int i=0;i<len;i++){
+	            	boolean type = highlighted.get(i).getFlag();
+	            	boolean eos = highlighted.get(i).isEndofSentence();
+	            	String breaker = null;
+	            	if(eos){
+	            		breaker = "\n\n";
+	            	}
+	            	else
+	            		breaker = " ";
+	            	if(type){		            		
+	            		if(highlighted.get(i).getListName().equals("AVL"))
+	            			appendToPane(originalText, highlighted.get(i).getWord() , Color.YELLOW);
+	            		else
+		                    appendToPane(originalText, highlighted.get(i).getWord() , Color.GREEN);
+
+
+	            	}
+	            	else{
+	                    appendToPane(originalText, highlighted.get(i).getWord() , Color.WHITE);
+	            	}
+	            	if(i < len -1){
+	            		if(!(highlighted.get(i+1).getWord().equals(".") || highlighted.get(i+1).getWord().equals(",")))
+	            			appendToPane(originalText, breaker , Color.WHITE);
+	            	}
+
+	            }
+
+	            originalText.setCaretPosition(0);
+	            taggedText.setEditable(true);
+	            taggedText.setText("");
+	            
+		        String output = parser.getAVL().toString();
+                appendToPane(taggedText, "AVL \n", Color.YELLOW);
+		    	appendToPane(taggedText, output, Color.WHITE);
+		    	
+		    	output = parser.getPVL().toString();
+		    	appendToPane(taggedText, "PVL \n", Color.GREEN);
+		    	appendToPane(taggedText, output, Color.WHITE);				    	
+		        taggedText.setCaretPosition(0);
+		        taggedText.setEditable(false);
+	        }
+	        catch (Exception e2){
+	        	e2.printStackTrace();
+	        }
+    	
 	    }
 	    if(e.getSource() == exportButton){
             JFileChooser exportFile = new JFileChooser();
@@ -198,5 +220,14 @@ public class PosTagger extends JFrame implements ActionListener{
             	parser.exportToCSV(filePath);
             }
 	    }
+	}
+	@Override
+	public void focusGained(FocusEvent e) {
+		filePath.setText(null);
+		fileLoaded = false;
+	}
+	@Override
+	public void focusLost(FocusEvent e) {
+	
 	}
 }

@@ -12,20 +12,20 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.io.File;
 import java.io.FileNotFoundException;
-
+import java.io.StringReader;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 public class Parser {
-	MaxentTagger tagger;
 //	PosList words;
 	PosList avl, pvl;
 	Map<String,String> irregularVerbs;
 	List<Highlight> highlighted;
-	public  Parser(String inputFile){
-			tagger = new MaxentTagger("taggers/english-left3words-distsim.tagger");
+	static MaxentTagger tagger = new MaxentTagger("taggers/english-left3words-distsim.tagger");
+
+	public  Parser(String input, boolean isFile){
 			avl = new PosList("AVL");
 			pvl = new PosList("PVL");
 			defaultSetting();
@@ -35,7 +35,11 @@ public class Parser {
 				highlighted = new ArrayList<Highlight>();
 				Boolean flag;
 				// tag POS by using Stanford pos tagger
-				List<List<HasWord>> sentences = MaxentTagger.tokenizeText(new BufferedReader(new FileReader(inputFile)));
+				List<List<HasWord>> sentences;
+				if(isFile)
+					sentences = MaxentTagger.tokenizeText(new BufferedReader(new FileReader(input)));
+				else
+					sentences = MaxentTagger.tokenizeText(new StringReader(input));
 				for (List<HasWord> sentence : sentences){
 					List<TaggedWord> tSentence = tagger.tagSentence(sentence);
 					for(TaggedWord word : tSentence){
