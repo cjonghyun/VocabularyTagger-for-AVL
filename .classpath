@@ -2,9 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="stanford-postagger.jar"/>
-	<classpathentry kind="lib" path="/Users/jonghyun/Documents/workspace/PosTagger/poi-3.12-20150511.jar"/>
-	<classpathentry kind="lib" path="/Users/jonghyun/Documents/workspace/PosTagger/simplenlgv4.3.jar"/>
+	<classpathentry kind="lib" path="JarFiles/poi-3.12-20150511.jar"/>
+	<classpathentry kind="lib" path="JarFiles/simplenlgv4.3.jar"/>
+	<classpathentry kind="lib" path="JarFiles/stanford-postagger-3.5.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

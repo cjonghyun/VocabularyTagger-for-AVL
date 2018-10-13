@@ -9,7 +9,7 @@ public class ExportFile {
 	private String result;
     private static final String COMMA_DELIMITER = ",";
     private static final String NEW_LINE_SEPARATOR = "\n";
-    private static final String FILE_HEADER = "id,word,pos,count";
+    private static final String FILE_HEADER = "id,word,pos,count,idNum";
 	public ExportFile(String fileName, String result){
 		this.fileName = fileName;
 		this.result = result;

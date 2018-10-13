@@ -51,18 +51,18 @@ public class PosList {
 	@Override
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("ID \t WORD \t\t POS \t COUNT\n");
+		sb.append("OID \t WORD \t\t POS \t COUNT\n");
 		for(Pos p : pos){
-			sb.append(name + String.format("%04d", p.getId()) + "\t" + String.format("%-20s", p.getWord()) + "\t"+ p.getTag() + "\t" + p.getCount() + "\n");
+			sb.append(p.getIdNum() + "\t" + String.format("%-20s", p.getWord()) + "\t"+ p.getTag() + "\t" + p.getCount() +  "\n");
 		}
 		return sb.toString();
 	}
 	public String csvForm(){
 		String result;
 			result = name + "\n";
-			result += "ID,WORD,POS,COUNT\n";
+			result += "WORD,POS,COUNT,OID\n";
 			for(Pos p : pos){
-				result += (name + String.format("%04d", p.getId()) + "," + p.getWord() + "," + p.getTag() + "," + p.getCount() + "\n");
+				result += (p.getIdNum() + "\t" + p.getWord() + "," + p.getTag() + "," + p.getCount() + "\n");
 			}
 		return result;		
 	}

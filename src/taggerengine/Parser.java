@@ -20,7 +20,7 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 public class Parser {
 //	PosList words;
-	PosList avl, pvl;
+	PosList avl, pvl, leapG, leapO;
 	Map<String,String> irregularVerbs;
 	List<Highlight> highlighted;
 	static MaxentTagger tagger = new MaxentTagger("taggers/english-left3words-distsim.tagger");
@@ -28,10 +28,14 @@ public class Parser {
 	public  Parser(String input, boolean isFile){
 			avl = new PosList("AVL");
 			pvl = new PosList("PVL");
+			leapG = new PosList("LEAPG");
+			leapO = new PosList("LEAPO");
 			defaultSetting();
 			try{
-				readList("AVL.txt", avl);
-				readList("PVL.txt",pvl);
+				readList("AVLRed.txt", avl);
+				readList("PVLBlue.txt", pvl);
+				readList("LEAPGreen.txt", leapG);
+				readList("LEAPOrange.txt", leapO);
 				highlighted = new ArrayList<Highlight>();
 				Boolean flag;
 				// tag POS by using Stanford pos tagger
@@ -43,17 +47,43 @@ public class Parser {
 				for (List<HasWord> sentence : sentences){
 					List<TaggedWord> tSentence = tagger.tagSentence(sentence);
 					for(TaggedWord word : tSentence){
-						flag = avl.contains(word.word().toLowerCase(), word.tag().substring(0, 1).toLowerCase());
-						if(flag)
+					flag = avl.contains(word.word().toLowerCase(), word.tag().substring(0, 1).toLowerCase());
+//					highlighted.add(new Highlight(word.word(), avl.getName(), flag));
+
+						if(flag){
 							highlighted.add(new Highlight(word.word(), avl.getName(), flag));
+//							flag = leapG.contains(word.word().toLowerCase(), word.tag().substring(0, 1).toLowerCase());
+						}
 						else{
 							flag = pvl.contains(word.word().toLowerCase(), word.tag().substring(0, 1).toLowerCase());
-							if(flag)
+							if(flag){
 								highlighted.add(new Highlight(word.word(), pvl.getName(), flag));
-							else
-								highlighted.add(new Highlight(word.word(), null, flag));
+							}
+							else{
+								flag = leapG.contains(word.word().toLowerCase(), word.tag().substring(0, 1).toLowerCase());
+								if(flag){
+									highlighted.add(new Highlight(word.word(), leapG.getName(), flag));
+								}
+								else{
+									flag = leapO.contains(word.word().toLowerCase(), word.tag().substring(0, 1).toLowerCase());
+									if(flag){
+										highlighted.add(new Highlight(word.word(), leapO.getName(), flag));
+									}
+									else{
+										highlighted.add(new Highlight(word.word(), null, flag));
+									}
+								}
+							}
 						}
 					}
+
+//					else if(flag){
+//						highlighted.add(new Highlight(word.word(), leapG.getName(), flag));
+//						flag = leapO.contains(word.word().toLowerCase(), word.tag().substring(0, 1).toLowerCase());
+//					}
+//					else if(flag){
+//						highlighted.add(new Highlight(word.word(), leapO.getName(), flag));
+//					}
 					highlighted.get(highlighted.size()-1).setEndOfSentence();
 				}
 			}
@@ -66,6 +96,13 @@ public class Parser {
 			
 			pvl.trim();
 			pvl.sort();
+			
+			leapG.trim();
+			leapG.sort();
+			
+			leapO.trim();
+			leapO.sort();
+			
 	}
 	private void defaultSetting(){
 		irregularVerbs = new TreeMap<String,String>();
@@ -88,7 +125,7 @@ public class Parser {
 			int id=1;
 			while(sc_words.hasNextLine()){
 				temp = sc_words.nextLine().toString().split("\t");
-				Pos p = new Pos(id,temp[0],temp[1]);
+				Pos p = new Pos(id,temp[0],temp[1],temp[2]);
 				if(irregularVerbs.get(temp[0]) !=null){
 					p.setPast(irregularVerbs.get(temp[0]));
 				}
@@ -107,13 +144,19 @@ public class Parser {
 	public PosList getPVL(){
 		return pvl;
 	}
+	public PosList getLEAPG(){
+		return leapG;
+	}
+	public PosList getLEAPO(){
+		return leapO;
+	}
 	public void exportToCSV(String fileName){
-		String result = avl.csvForm() + "\n" +pvl.csvForm();
+		String result = avl.csvForm() + "\n" +pvl.csvForm() + "\n" +leapG.csvForm() + "\n" +leapO.csvForm();
 		ExportFile csv = new ExportFile(fileName,result);
 		csv.exportCsv();
 	}
 	public String toString(){
-		return avl.toString() + "\n" + pvl.toString();
+		return avl.toString() + "\n" + pvl.toString() + "\n" + leapG.toString() + "\n" + leapO.toString();
 	}
 	public List<Highlight> getHighlighted(){
 		return highlighted;

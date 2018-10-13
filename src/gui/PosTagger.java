@@ -157,8 +157,12 @@ public class PosTagger extends JFrame implements ActionListener, FocusListener{
 	            Style defaultStyle = styleContext.getStyle(StyleContext.DEFAULT_STYLE);
 	            Style avlStyle = styleContext.addStyle("ConstantWidth", null);
 	            Style pvlStyle = styleContext.addStyle("ConstantWidth", null);
-	            StyleConstants.setBackground(avlStyle, Color.YELLOW);
-	            StyleConstants.setBackground(pvlStyle, Color.ORANGE);
+	            Style leapGStyle = styleContext.addStyle("ConstantWidth", null);
+	            Style leapOStyle = styleContext.addStyle("ConstantWidth", null);
+	            StyleConstants.setBackground(avlStyle, Color.PINK);
+	            StyleConstants.setBackground(pvlStyle, Color.CYAN);
+	            StyleConstants.setBackground(leapGStyle, Color.GREEN);
+	            StyleConstants.setBackground(leapOStyle, Color.ORANGE);
 
 	            int len = highlighted.size();
 	            originalText.setText("");
@@ -167,15 +171,19 @@ public class PosTagger extends JFrame implements ActionListener, FocusListener{
 	            	boolean eos = highlighted.get(i).isEndofSentence();
 	            	String breaker = null;
 	            	if(eos){
-	            		breaker = "\n\n";
+	            		breaker = "\n\n"	;
 	            	}
 	            	else
 	            		breaker = " ";
 	            	if(type){		            		
 	            		if(highlighted.get(i).getListName().equals("AVL"))
-	            			appendToPane(originalText, highlighted.get(i).getWord() , Color.YELLOW);
+	            			appendToPane(originalText, highlighted.get(i).getWord() , Color.PINK);
+	            		else if (highlighted.get(i).getListName().equals("LEAPG"))
+	            			appendToPane(originalText, highlighted.get(i).getWord() , Color.GREEN);
+	            		else if (highlighted.get(i).getListName().equals("LEAPO"))
+	            			appendToPane(originalText, highlighted.get(i).getWord() , Color.ORANGE);
 	            		else
-		                    appendToPane(originalText, highlighted.get(i).getWord() , Color.GREEN);
+		                    appendToPane(originalText, highlighted.get(i).getWord() , Color.CYAN);
 
 
 	            	}
@@ -194,12 +202,20 @@ public class PosTagger extends JFrame implements ActionListener, FocusListener{
 	            taggedText.setText("");
 	            
 		        String output = parser.getAVL().toString();
-                appendToPane(taggedText, "AVL \n", Color.YELLOW);
+                appendToPane(taggedText, "AVL \n", Color.PINK);
 		    	appendToPane(taggedText, output, Color.WHITE);
 		    	
 		    	output = parser.getPVL().toString();
-		    	appendToPane(taggedText, "PVL \n", Color.GREEN);
-		    	appendToPane(taggedText, output, Color.WHITE);				    	
+		    	appendToPane(taggedText, "PVL \n", Color.CYAN);
+		    	appendToPane(taggedText, output, Color.WHITE);
+		    	
+		    	output = parser.getLEAPG().toString();
+		    	appendToPane(taggedText, "LEAPG \n", Color.GREEN);
+		    	appendToPane(taggedText, output, Color.WHITE);
+		    	
+		    	output = parser.getLEAPO().toString();
+		    	appendToPane(taggedText, "LEAPO \n", Color.ORANGE);
+		    	appendToPane(taggedText, output, Color.WHITE);	
 		        taggedText.setCaretPosition(0);
 		        taggedText.setEditable(false);
 	        }

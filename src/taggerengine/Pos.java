@@ -12,12 +12,14 @@ public class Pos implements Comparable{
 	private int id;
 	private String word;  // word of the sentence
 	private String pastTense;
-	private String tag;   // part of speech
+	private String tag;   // part of speech;
+	private String idNum;
 	private int count;    // count the frequency of the word with the tagged part of speech
-	public Pos(int id, String w, String t){
+	public Pos(int id, String w, String t, String n){
 		this.id = id;
 		word = w;
 		tag = t;
+		idNum = n;
 		count = 0;
 		pastTense = exceptions(w);
 
@@ -71,6 +73,9 @@ public class Pos implements Comparable{
 	}
 	public String getTag(){
 		return tag;
+	}
+	public String getIdNum(){
+		return idNum;
 	}
 	public int getCount(){
 		return count;
